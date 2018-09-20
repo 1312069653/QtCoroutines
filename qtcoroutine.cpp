@@ -25,6 +25,10 @@ QtCoroutine::ResumeResult QtCoroutine::resume(QtCoroutine::RoutineId id)
 		return Finished;
 	if(!Ordinator::ordinator.resume(id))
 		return Error;
+	if(Ordinator::ordinator.exceptions.contains(id)) {
+		auto except = Ordinator::ordinator.exceptions.take(id);
+		except->raise();
+	}
 	return Ordinator::ordinator.routines.contains(id) ? Paused : Finished;
 }
 
@@ -90,6 +94,10 @@ void QtCoroutine::Ordinator::entryImpl()
 {
 	auto id = executionStack.top().first;
 	auto fn = executionStack.top().second.func;
-	fn();
+	try {
+		fn();
+	} catch(QException &e) {
+		exceptions.insert(id, QSharedPointer<QException>{e.clone()});
+	}
 	routines.remove(id);
 }

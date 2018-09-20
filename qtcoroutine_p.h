@@ -4,6 +4,7 @@
 #include "qtcoroutine.h"
 #include <QStack>
 #include <QSharedPointer>
+#include <QtCore/QException>
 #ifdef Q_OS_WIN
 #include <qt_windows.h>
 #else
@@ -29,6 +30,7 @@ struct Routine
 struct Ordinator
 {
 	QHash<RoutineId, Routine> routines;
+	QHash<RoutineId, QSharedPointer<QException>> exceptions;
 	QStack<QPair<RoutineId, Routine>> executionStack;
 #ifdef Q_OS_WIN
 	LPVOID context;

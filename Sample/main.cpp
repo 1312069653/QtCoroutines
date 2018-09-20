@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QThread>
 #include <QBuffer>
+#include <QException>
 
 #include "qtcoroutine.h"
 #include "qtcoawaitables.h"
@@ -20,6 +21,20 @@ QObject *testObj;
 Queue<int> testQueue;
 
 QBuffer testDevice;
+
+class Except : public QException
+{
+public:
+	const char *what() const noexcept override {
+		return "hello world";
+	}
+	void raise() const override {
+		throw *this;
+	}
+	QException *clone() const override {
+		return new Except{};
+	}
+};
 
 }
 
@@ -77,6 +92,14 @@ void coroutine_basic()
 	qDebug() << "still her";
 
 	qDebug() << "end";
+}
+
+void coroutine_exception()
+{
+	qDebug() << "begin";
+	yield();
+	qDebug() << "back";
+	throw Except{};
 }
 
 void coroutine_signals()
@@ -182,6 +205,17 @@ int main(int argc, char *argv[])
 	qDebug() << "back";
 	resume(id);
 	qDebug() << "back";
+
+	// test exceptions
+	try {
+		id = createAndRun(coroutine_exception).first;
+		qDebug() << "back";
+		resume(id);
+		qCritical() << "back without exception";
+		return EXIT_FAILURE;
+	} catch(Except &e) {
+		qDebug() << "back after exception" << e.what();
+	}
 
 	// test await signals
 	testObj = new QObject(qApp);
