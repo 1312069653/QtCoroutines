@@ -52,3 +52,31 @@ QtCoroutine::iodevice::type QtCoroutine::iodevice::result()
 {
 	return std::move(_result);
 }
+
+
+
+#if QT_CONFIG(process)
+
+QtCoroutine::process::process(QProcess *process) :
+	_process{process}
+{}
+
+void QtCoroutine::process::prepare(std::function<void()> resume)
+{
+	_connection = QObject::connect(_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+								   [this, resume](){
+		QObject::disconnect(_connection);
+		resume();
+	});
+	if(!_process->isOpen())
+		_process->start();
+}
+
+QtCoroutine::process::type QtCoroutine::process::result()
+{
+	return _process->exitStatus() == QProcess::NormalExit ?
+				_process->exitCode() :
+				-1;
+}
+
+#endif

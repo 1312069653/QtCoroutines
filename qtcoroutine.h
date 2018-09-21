@@ -6,6 +6,10 @@
 
 #include <QAtomicInt>
 #include <QObject>
+#include <QSet>
+#include <QSharedPointer>
+
+#include "qtcoroutine_global.h"
 
 namespace QtCoroutine
 {
@@ -21,17 +25,17 @@ enum ResumeResult {
 	Error
 };
 
-extern QAtomicInteger<size_t> StackSize;
+QTCOROUTINE_EXPORT extern QAtomicInteger<size_t> StackSize;
 
-RoutineId create(std::function<void()> fn);
-bool isPaused(RoutineId id);
-ResumeResult resume(RoutineId id);
-void cancel(RoutineId id);
-std::pair<RoutineId, ResumeResult> createAndRun(std::function<void()> fn);
+QTCOROUTINE_EXPORT RoutineId create(std::function<void()> fn);
+QTCOROUTINE_EXPORT bool isPaused(RoutineId id);
+QTCOROUTINE_EXPORT ResumeResult resume(RoutineId id);
+QTCOROUTINE_EXPORT void cancel(RoutineId id);
+QTCOROUTINE_EXPORT std::pair<RoutineId, ResumeResult> createAndRun(std::function<void()> fn);
 
-RoutineId current();
-void yield();
-void abort();
+QTCOROUTINE_EXPORT RoutineId current();
+QTCOROUTINE_EXPORT void yield();
+QTCOROUTINE_EXPORT void abort();
 
 template <typename TAwaitable>
 typename TAwaitable::type await(TAwaitable &&awaitable) {
@@ -39,6 +43,24 @@ typename TAwaitable::type await(TAwaitable &&awaitable) {
 	yield();
 	return awaitable.result();
 };
+
+template <typename TContainer, typename THandler>
+void awaitEach(const TContainer &container, THandler handler) {
+	auto suspendedIds = QSharedPointer<QSet<RoutineId>>::create();
+	const auto selfId = current();
+	for(const auto &data : container) {
+		auto subRes = createAndRun([fn{std::move(handler)}, data, selfId, suspendedIds](){
+			fn(data);
+			if(suspendedIds->remove(current()) && suspendedIds->isEmpty())
+				resume(selfId); //TODO use resumeAfter
+		});
+		if(subRes.second == Paused)
+			suspendedIds->insert(subRes.first);
+	}
+
+	if(!suspendedIds->isEmpty())
+		yield();
+}
 
 // theoretical template interface for await
 // You don't have to implement this interface - it is only ment as documentation.

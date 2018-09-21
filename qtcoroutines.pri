@@ -8,7 +8,8 @@ PUBLIC_HEADERS += \
 	$$PWD/qtcoconcurrent.h
 
 HEADERS += $$PUBLIC_HEADERS \
-	$$PWD/qtcoroutine_p.h
+	$$PWD/qtcoroutine_p.h \
+	$$PWD/qtcoroutine_global.h
 
 SOURCES += \
 	$$PWD/qtcoroutine.cpp \
@@ -19,3 +20,5 @@ win32: SOURCES += $$PWD/qtcoroutine_win.cpp
 else: SOURCES += $$PWD/qtcoroutine_unix.cpp
 
 INCLUDEPATH += $$PWD
+
+qtcoroutines_exported: DEFINES += QTCOROUTINE_EXPORTED QTCOROUTINE_LIBRARY

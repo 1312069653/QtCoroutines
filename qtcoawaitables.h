@@ -3,12 +3,15 @@
 
 #include "qtcoroutine.h"
 #include <QIODevice>
+#if QT_CONFIG(process)
+#include <QProcess>
+#endif
 
 namespace QtCoroutine {
 
 // timeout
 
-struct timeout {
+struct QTCOROUTINE_EXPORT timeout {
 	timeout(std::chrono::milliseconds tout);
 	template <typename _Rep, typename _Period>
 	timeout(const std::chrono::duration<_Rep, _Period> &tout) :
@@ -24,7 +27,7 @@ private:
 };
 
 inline void await(std::chrono::milliseconds tout) {
-	await(timeout{std::move(tout)});
+	await(timeout{tout});
 }
 template <typename _Rep, typename _Period>
 inline void await(const std::chrono::duration<_Rep, _Period> &tout) {
@@ -114,7 +117,7 @@ inline typename sigfn<Func>::type await(const typename QtPrivate::FunctionPointe
 
 // io device
 
-struct iodevice {
+struct QTCOROUTINE_EXPORT iodevice {
 	enum SpecialReads : qint64 {
 		ReadAll = -1,
 		ReadLine = 0
@@ -142,6 +145,27 @@ inline QByteArray awaitAll(QIODevice *device) {
 inline QByteArray awaitLine(QIODevice *device) {
 	return await(iodevice{device, iodevice::ReadLine});
 }
+
+// QProcess
+#if QT_CONFIG(process)
+
+struct QTCOROUTINE_EXPORT process {
+	process(QProcess *process);
+
+	using type = int;
+	void prepare(std::function<void()> resume);
+	type result();
+
+private:
+	QProcess * const _process;
+	QMetaObject::Connection _connection;
+};
+
+inline int await(QProcess *process) {
+	return await(QtCoroutine::process{process});
+}
+
+#endif
 
 }
 

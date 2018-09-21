@@ -16,10 +16,10 @@ public:
 	Iterator(RoutineId producer);
 	Iterator(std::function<void()> producer);
 	Iterator(const Iterator<T> &other) = default;
-	Iterator(Iterator<T> &&other) = default;
+	Iterator(Iterator<T> &&other) noexcept = default;
 
 	Iterator<T> &operator=(const Iterator<T> &other) = default;
-	Iterator<T> &operator=(Iterator<T> &&other) = default;
+	Iterator<T> &operator=(Iterator<T> &&other) noexcept = default;
 
 	bool hasNext();
 	T next();
