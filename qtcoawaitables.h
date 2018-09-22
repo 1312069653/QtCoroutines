@@ -1,6 +1,7 @@
 #ifndef QTAWAITABLES_H
 #define QTAWAITABLES_H
 
+#include <type_traits>
 #include "qtcoroutine.h"
 #include <QIODevice>
 #if QT_CONFIG(process)
