@@ -1,5 +1,5 @@
 #include "qtcoroutine_p.h"
-#include <errno>
+#include <cerrno>
 #include <QDebug>
 
 bool QtCoroutine::Ordinator::resume(QtCoroutine::RoutineId id)
