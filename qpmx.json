@@ -5,7 +5,7 @@
         "file": "LICENSE",
         "name": "BSD_3_CLAUSE"
     },
-    "prcFile": "",
+    "prcFile": "qtcoroutines.prc",
     "priFile": "qtcoroutines.pri",
     "priIncludes": [
     ],

@@ -1,0 +1,2 @@
+CONFIG += c++14
+mac: DEFINES += _XOPEN_SOURCE

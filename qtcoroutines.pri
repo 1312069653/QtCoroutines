@@ -1,5 +1,7 @@
 CONFIG += c++14
 
+mac: DEFINES += _XOPEN_SOURCE
+
 PUBLIC_HEADERS += \
 	$$PWD/qtcoroutine_global.h \
 	$$PWD/qtcoroutine.h \
