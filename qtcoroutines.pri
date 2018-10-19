@@ -1,6 +1,7 @@
 CONFIG += c++14
 
 PUBLIC_HEADERS += \
+	$$PWD/qtcoroutine_global.h \
 	$$PWD/qtcoroutine.h \
 	$$PWD/qtcoawaitables.h \
 	$$PWD/qtcoqueue.h \
@@ -8,8 +9,7 @@ PUBLIC_HEADERS += \
 	$$PWD/qtcoconcurrent.h
 
 HEADERS += $$PUBLIC_HEADERS \
-	$$PWD/qtcoroutine_p.h \
-	$$PWD/qtcoroutine_global.h
+	$$PWD/qtcoroutine_p.h
 
 SOURCES += \
 	$$PWD/qtcoroutine.cpp \
